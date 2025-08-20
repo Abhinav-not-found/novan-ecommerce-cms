@@ -1,15 +1,32 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
+type CustomSessionClaims = {
+  publicMetadata?:{
+    role?:string;
+  }
+}
+
 const isHomeRoute = createRouteMatcher(["/home(.*)"]);
 const isLandingPage = createRouteMatcher(["/"]);
+const isAdmin = createRouteMatcher(["/dashboard(.*)"]);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
+  const { userId } = await auth();
   if (isHomeRoute(req)) {
     await auth.protect();
   }
-  if (isLandingPage(req) && (await auth()).userId) {
+  if (isLandingPage(req) && userId) {
     return Response.redirect(new URL("/home", req.url));
+  }
+  if (isAdmin(req)) {
+      const { sessionClaims } = (await auth.protect()) as {
+      sessionClaims: CustomSessionClaims;
+    };
+    const role = sessionClaims?.publicMetadata?.role;
+    if (role !== "admin") {
+      return Response.redirect(new URL("/home", req.url));
+    }
   }
 });
 

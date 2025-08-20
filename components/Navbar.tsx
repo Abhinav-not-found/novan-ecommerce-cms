@@ -10,24 +10,35 @@ import React from "react";
 
 import { useUser } from "@clerk/nextjs";
 import { Button } from "./ui/button";
+import { ShoppingCart } from "lucide-react";
+import Link from "next/link";
 
 const Navbar = () => {
   const { user } = useUser();
+  console.log(user?.publicMetadata.role)
   return (
-    <header className='flex justify-between items-center '>
+    <header className='flex justify-between items-center  h-8 mt-2 mb-4'>
       <div>
-        <h1 className='text-2xl font-semibold'>Novan</h1>
+        <Link
+          href={user?.publicMetadata.role ==='admin' ? "/dashboard" : user ? "/home" : "/"}
+          className='text-2xl font-semibold'
+        >
+          Novan
+        </Link>
       </div>
-      <div className="flex items-center">
+      <div className='flex items-center'>
         <SignedOut>
-          <SignInButton forceRedirectUrl='/home' />
-          <SignUpButton forceRedirectUrl='/home'>
+          <SignInButton forceRedirectUrl='/redirect' />
+          <SignUpButton forceRedirectUrl='/redirect'>
             <button className=''>Sign Up</button>
           </SignUpButton>
         </SignedOut>
         <SignedIn>
+          <Button variant={"ghost"} className='mr-2'>
+            <ShoppingCart />
+            Cart
+          </Button>
           <UserButton />
-          <Button className="ml-2">Cart</Button>
         </SignedIn>
       </div>
     </header>
